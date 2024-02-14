@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript" src="jquery-3.7.1.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            var $container = $('#container')
+            var $list = $container.children("#list")
+            var $points_all = $('#pointsDiv>span')
+            var $points = $points_all.first()
+            var $prev = $('#prev')
+            var $next = $('#next')
+            var PAGE_WIDTH = 600
+            var exe = false
+
+            autoChanePage()
+
+            $next.click(function () {
+                auto_click_changePage(true)
+            })
+
+            $prev.click(function () {
+                auto_click_changePage(false)
+            })
+
+            function coreChangePage(currentLeft, aimOffset, length_interval, intervalTime, flag) {
+                var offset = 0
+                var intervalId1 = setInterval(function () {
+                    offset += length_interval
+                    if (offset >= aimOffset) {
+                        offset = aimOffset
+                        clearInterval(intervalId1)
+                        exe = false
+                    }
+                    $list.css('left', currentLeft + (flag ? -1 * offset : offset))
+                }, intervalTime)
+            }
+
+            function auto_click_changePage(flag_change) {
+                if (exe) {
+                    return
+                }
+                exe = true
+                var currentLeft = $list.position().left
+                if (flag_change && currentLeft === -3000) {
+                    currentLeft += 3000
+                    $list.css('left', currentLeft)
+                }
+                if (!flag_change && currentLeft === -600) {
+                    currentLeft -= 3000
+                    $list.css('left', currentLeft)
+
+                }
+                var intervalTime = 20
+                var length_interval = 10
+                coreChangePage(currentLeft, PAGE_WIDTH, length_interval, intervalTime, flag_change)
+                var index = $points.index()
+                var targetIndex
+                if (flag_change) {
+                    targetIndex = (index + 1) % 5
+                } else {
+                    if (index === 0) {
+                        targetIndex = 4
+                    } else {
+                        targetIndex = index - 1
+                    }
+                }
+                moveToTargetPoint(index, targetIndex)
+            }
+
+            function autoChanePage() {
+                let intervalTime = 3000
+                $container.mouseenter(function () {
+                    clearInterval(intervalId2)
+
+                })
+                $container.mouseleave(function () {
+                    autoChanePage()
+                })
+                let intervalId2 = setInterval(function () {
+                    auto_click_changePage(true)
+                }, intervalTime)
+            }
+
+            $points_all.click(function () {
+                var targetIndex = $(this).index()
+                var index = $points.index()
+                if (targetIndex !== index) {
+                    pointnextPage(index, targetIndex)
+                }
+
+            })
+
+            function pointnextPage(index, targetIndex) {
+                if (exe) {
+                    return
+                }
+                exe = true
+                let aimOffset = (targetIndex - index) * PAGE_WIDTH
+                if (aimOffset < 0) {
+                    aimOffset = -1 * aimOffset
+                }
+                let currentLeft = $list.position().left
+                let intervalTime = 10
+                let length_interval = 20
+                coreChangePage(currentLeft, aimOffset, length_interval, intervalTime, targetIndex - index > 0 ? true : false)
+                moveToTargetPoint(index, targetIndex)
+            }
+
+            function moveToTargetPoint(index, targetIndex) {
+                $points.removeAttr("class")
+                $points = $points_all.eq(targetIndex)
+                $points.attr("class", "on")
+            }
+        })
+    </script>
+
+</head>
+
+<body>
+<div id="container">
+    <div id="list">
+        <img src="5.png" alt="5">
+        <img src="1.png" alt="1">
+        <img src="2.png" alt="2">
+        <img src="3.png" alt="3">
+        <img src="4.png" alt="4">
+        <img src="5.png" alt="5">
+        <img src="1.png" alt="1">
+    </div>
+    <div id="pointsDiv">
+        <span index="1" class="on"></span>
+        <span index="2"></span>
+        <span index="3"></span>
+        <span index="4"></span>
+        <span index="5"></span>
+    </div>
+    <a href="javascript:;" id="prev" class="arrow"><</a>
+    <a href="javascript:;" id="next" class="arrow">></a>
+</div>
+
+
+</body>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        text-decoration: none;
+    }
+
+    body {
+        padding: 20px;
+    }
+
+    /*最外围的div*/
+    #container {
+        width: 600px;
+        height: 450px;
+        overflow: hidden;
+        position: relative; /*相对定位*/
+        margin: 0 auto;
+    }
+
+    /*包含所有图片的<div>*/
+    #list {
+        width: 4200px; /*7张图片的宽:7*600*/
+        height: 400px;
+        position: absolute; /*绝对定位*/
+        z-index: 1;
+        left: -600px;
+
+    }
+
+    /*所有的图片<img>*/
+    #list img {
+        float: left; /*浮在左侧*/
+        width: 600px;
+        height: 100%;
+    }
+
+    /*包含所有圆点按钮的<div>*/
+    #pointsDiv {
+        position: absolute;
+        height: 10px;
+        width: 100px;
+        z-index: 2;
+        bottom: 20px;
+        left: 275px;
+    }
+
+    /*所有的圆点<span>*/
+    #pointsDiv span {
+        cursor: pointer;
+        float: left;
+        border: 1px solid #fff;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #333;
+        margin-right: 5px;
+    }
+
+    /*第一个<span>*/
+    #pointsDiv .on {
+        background: orangered;
+    }
+
+    /*切换图标<a>*/
+    .arrow {
+        cursor: pointer;
+        display: none;
+        line-height: 39px;
+        text-align: center;
+        font-size: 36px;
+        font-weight: bold;
+        width: 40px;
+        height: 40px;
+        position: absolute;
+        z-index: 2;
+        top: 180px;
+        background-color: RGBA(0, 0, 0, 0.3);
+        color: #fff;
+    }
+
+    /*鼠标移到切英图标上时*/
+    .arrow:hover {
+        background-color: rgba(0, 0, 0, 0.7);
+    }
+
+    /*鼠标移到整个div区域时*/
+    #container:hover .arrow {
+        display: block;
+    }
+
+    /*显示*/
+    /*上一个切英图标的左外边距*/
+    #prev {
+        left: 20px;
+    }
+
+    /*下一个切英图标的右外边距*/
+    #next {
+        right: 20px;
+    }
+
+</style>
+</html>
