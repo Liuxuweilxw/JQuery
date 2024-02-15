@@ -82,10 +82,10 @@ layui.use(function(){
         '</ul>'].join(''),
         success: function(layero, index){
           layero.find('.layui-layer-content').css('overflow', 'visible');
-          
+
           form.render().on('submit(*)', function(data){
             var field = data.field;
-            
+
             // 显示填写的表单
             layer.msg(util.escape(JSON.stringify(field)), {
               icon: 1
